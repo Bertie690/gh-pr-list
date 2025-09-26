@@ -1,0 +1,49 @@
+package filter
+
+import (
+	"bytes"
+	"testing"
+
+	"github.com/Bertie690/gh-pr-list/test"
+)
+
+func Test_filterJSON(t *testing.T) {
+	tests := []struct {
+		name    string
+		json    string
+		query   string
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "all mergeable",
+			json: `[
+  {
+    "mergeable": "CONFLICTING",
+    "foo": 1,
+  },
+  {
+    "mergeable": "NOPE",
+    "foo": 2,
+  },
+]`,
+			query: `map(select(.mergeable == CONFLICTING))`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			buf := bytes.NewBufferString(tt.json)
+			got, gotErr := filterJSON(buf, tt.query)
+			if (gotErr != nil) != tt.wantErr {
+				if tt.wantErr {
+					t.Errorf("filterJSON() succeeded unexpectedly!")
+				} else {
+					t.Errorf("filterJSON() failed: %v", gotErr)
+				}
+				return
+			}
+			gotStr := got.String()
+			test.CompareAsJSON(t, gotStr, tt.want)
+		})
+	}
+}
