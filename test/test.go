@@ -45,14 +45,14 @@ func CompareAsJSON(t *testing.T, got, want any) {
 
 	// Don't re-serialize objects that are already valid JSON
 	if gotJson, ok = got.(string); !ok {
-		gotBytes, err := json.MarshalIndent(got, "", "  ")
+		gotBytes, err := json.MarshalIndent(got, "", "\t")
 		if err != nil {
 			t.Fatalf("CompareAsJSON could not marshal got to json: \n%v", err)
 		}
 		gotJson = string(gotBytes)
 	}
 	if wantJson, ok = want.(string); !ok {
-		wantBytes, err := json.MarshalIndent(want, "", "  ")
+		wantBytes, err := json.MarshalIndent(want, "", "\t")
 		if err != nil {
 			t.Fatalf("CompareAsJSON could not marshal want to json: \n%v", err)
 		}

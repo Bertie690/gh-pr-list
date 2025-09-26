@@ -63,5 +63,6 @@ func runCmd(cmd *cobra.Command, args []string) (err error) {
 	if err != nil {
 		return
 	}
+	showUsage(false)
 	return filter.CreateList(repo, args[0], args[1])
 }

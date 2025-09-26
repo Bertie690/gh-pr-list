@@ -18,16 +18,22 @@ func Test_filterJSON(t *testing.T) {
 		{
 			name: "all mergeable",
 			json: `[
-  {
-    "mergeable": "CONFLICTING",
-    "foo": 1,
-  },
-  {
-    "mergeable": "NOPE",
-    "foo": 2,
-  },
+	{
+		"mergeable": "CONFLICTING",
+		"foo": 1
+	},
+	{
+		"foo": 2,
+		"mergeable": "MERGEABLE"
+	}
 ]`,
-			query: `map(select(.mergeable == CONFLICTING))`,
+			query: `map(select(.mergeable == "CONFLICTING"))`,
+			want: `[
+	{
+		"mergeable": "CONFLICTING",
+		"foo": 1
+	}
+]`,
 		},
 	}
 	for _, tt := range tests {
