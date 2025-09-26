@@ -9,7 +9,7 @@ import (
 	"github.com/cli/go-gh/v2/pkg/repository"
 )
 
-func CreateList(repo repository.Repository, query string, template string) (err error) {
+func CreateList(repo repository.Repository, query string, template string, args []string) (err error) {
 	fmt.Printf("Fetching PRs for %s\n", getRepoName(repo))
 	json, err := getPrs()
 	if err != nil {

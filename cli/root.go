@@ -18,10 +18,10 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:          "gh pr-list [flags] [filter] [template]",
+	Use:          "gh pr-list [flags] filter template [...args]",
 	Short:        "A gh extension providing a simple interface for listing active PRs.",
 	Version:      buildVersion(Version, Commit, Date, BuiltBy),
-	Args:         cobra.ExactArgs(2),
+	Args:         cobra.MinimumNArgs(2),
 	SilenceUsage: false,
 }
 
@@ -29,7 +29,7 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
-		os.Exit(0)
+		os.Exit(1)
 	}
 }
 
@@ -64,5 +64,6 @@ func runCmd(cmd *cobra.Command, args []string) (err error) {
 		return
 	}
 	showUsage(false)
-	return filter.CreateList(repo, args[0], args[1])
+
+	return filter.CreateList(repo, args[0], args[1], args[1:])
 }
