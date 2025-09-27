@@ -1,5 +1,6 @@
 package filter
 
+// All valid arguments that can be obtained from JSON.
 var validArgs = []string{
 	"additions",
 	"assignees",

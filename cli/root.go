@@ -6,7 +6,6 @@ import (
 	"runtime/debug"
 
 	"github.com/Bertie690/gh-pr-list/filter"
-	"github.com/cli/go-gh/v2/pkg/repository"
 	"github.com/spf13/cobra"
 )
 
@@ -18,10 +17,13 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:          "gh pr-list [flags] [filter] [template]",
-	Short:        "A gh extension providing a simple interface for listing active PRs.",
+	Use:   "gh pr-list [flags] filter template [-- ...args]",
+	Short: "A gh extension providing a simple interface for listing active PRs.",
+	Long: `A gh extension providing a simple interface for listing active PRs.
+
+Any additional arguments after filter and template will be passed directly to "gh pr list".`,
 	Version:      buildVersion(Version, Commit, Date, BuiltBy),
-	Args:         cobra.ExactArgs(2),
+	Args:         cobra.MinimumNArgs(2),
 	SilenceUsage: false,
 }
 
@@ -29,7 +31,7 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
-		os.Exit(0)
+		os.Exit(1)
 	}
 }
 
@@ -59,9 +61,7 @@ func init() {
 
 // runCmd runs the gh command.
 func runCmd(cmd *cobra.Command, args []string) (err error) {
-	repo, err := repository.Current()
-	if err != nil {
-		return
-	}
-	return filter.CreateList(repo, args[0], args[1])
+	silenceUsage(true)
+
+	return filter.CreateList(args[0], args[1], args[2:])
 }

@@ -2,16 +2,19 @@ package filter
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/cli/go-gh/v2"
-	"github.com/cli/go-gh/v2/pkg/repository"
 )
 
-func CreateList(repo repository.Repository, query string, template string) (err error) {
-	fmt.Printf("Fetching PRs for %s\n", getRepoName(repo))
-	json, err := getPrs()
+func CreateList(query string, template string, args []string) (err error) {
+	if len(args) > 0 {
+		fmt.Printf("Using extra args %s\n", strings.Join(args, ","))
+	}
+	json, err := getPrs(args)
 	if err != nil {
 		return
 	}
@@ -19,32 +22,39 @@ func CreateList(repo repository.Repository, query string, template string) (err 
 	var queried *bytes.Buffer
 	if query == "" {
 		queried = json
-	} else {
-		queried, err = filterJSON(json, query)
+		} else {
+			queried, err = filterJSON(json, query)
+			fmt.Println(queried.String())
 		if err != nil {
 			return
 		}
 	}
-	applyTemplate(queried, template)
-	fmt.Println(queried.String())
+	output, err := applyTemplate(queried, template)
+	if err != nil {
+		return
+	}
+	fmt.Println(output)
 	return nil
 }
 
-func getRepoName(repo repository.Repository) string {
-	result := ""
-	if repo.Host != "" {
-		result += repo.Host + ":"
+func getPrs(args []string) (*bytes.Buffer, error) {
+	if err := validateExtraArgs(args); err != nil {
+		return nil, err
 	}
-	result += repo.Owner + "/" + repo.Name
-	return result
-}
-
-func getPrs() (*bytes.Buffer, error) {
-	stdout, stderr, err := gh.Exec("pr", "list", "--json="+strings.Join(validArgs, ","))
+	stdout, stderr, err := gh.Exec(append([]string{"pr", "list", "--json=" + strings.Join(validArgs, ",")}, args...)...)
 	if err != nil {
-		fmt.Println(stderr.String())
-		return &stderr, err
+		return nil, errors.New(stderr.String())
 	}
 	return &stdout, nil
+}
 
+// validateExtraArgs performs extra validation to ensure that any extra CLI args are valid.
+func validateExtraArgs(args []string) error {
+	if slices.ContainsFunc(args, func(s string) bool {
+		return strings.Contains(s, "--json")
+	}) {
+		return errors.New("cannot pass --json flag; all fields are enabled by default")
+	}
+
+	return nil
 }
