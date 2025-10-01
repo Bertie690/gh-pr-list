@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2025 Matthew Taylor <taylormw163@gmail.com>
+// SPDX-FileContributor: Matthew Taylor (Bertie690)
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package cli
 
 import (
@@ -21,7 +26,9 @@ var rootCmd = &cobra.Command{
 	Short: "A gh extension providing a simple interface for listing active PRs.",
 	Long: `A gh extension providing a simple interface for listing active PRs.
 
-Any additional arguments after filter and template will be passed directly to "gh pr list".`,
+Any additional arguments after filter and template will be passed directly to ` + "`gh pr list`" + `.
+
+For more information about JQ or Go template formatting, see ` + "`gh help formatting`.",
 	Version:      buildVersion(Version, Commit, Date, BuiltBy),
 	Args:         cobra.MinimumNArgs(2),
 	SilenceUsage: false,

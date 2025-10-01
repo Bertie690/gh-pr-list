@@ -1,5 +1,10 @@
+# SPDX-License-Identifier: CC0-1.0
+
 # Test binary, built with `go test -c`
 *.test
+
+# Editor Directories
+.vscode
 
 tmp/
 data/

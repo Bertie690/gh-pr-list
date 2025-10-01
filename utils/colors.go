@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2025 Matthew Taylor <taylormw163@gmail.com>
+// SPDX-FileContributor: Matthew Taylor (Bertie690)
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package utils
 
 import (
@@ -10,12 +15,12 @@ import (
 
 // SprintColorHex colors a string according to a hex code and returns it.
 // It supports formatting directives similar to [fmt.Sprintf].
-func SprintColorHex(s string, hex string, args ...any) string {
+func SprintColorHex(hex string, s string, args ...any) string {
 	return color.RGB(rgbToHex(hex)).Sprintf(s, args...)
 }
 
 // ColorHex colors a string according to a hex code and returns it.
-func ColorHex(s string, hex string) string {
+func ColorHex(hex string, s string) string {
 	return color.RGB(rgbToHex(hex)).Sprint(s)
 }
 

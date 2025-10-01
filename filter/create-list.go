@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2025 Matthew Taylor <taylormw163@gmail.com>
+// SPDX-FileContributor: Matthew Taylor (Bertie690)
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package filter
 
 import (
@@ -11,9 +16,6 @@ import (
 )
 
 func CreateList(query string, template string, args []string) (err error) {
-	if len(args) > 0 {
-		fmt.Printf("Using extra args %s\n", strings.Join(args, ","))
-	}
 	json, err := getPrs(args)
 	if err != nil {
 		return
@@ -24,7 +26,6 @@ func CreateList(query string, template string, args []string) (err error) {
 		queried = json
 		} else {
 			queried, err = filterJSON(json, query)
-			fmt.Println(queried.String())
 		if err != nil {
 			return
 		}
