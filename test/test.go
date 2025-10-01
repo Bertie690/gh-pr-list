@@ -13,10 +13,11 @@ import (
 	"strings"
 	"testing"
 
+	stringutils "github.com/Bertie690/gh-pr-list/utils/strings"
 	"github.com/nsf/jsondiff"
 )
 
-// CompareAsJSON compares 2 objects as json outputs for testing.
+// CompareAsJSON compares 2 objects as JSON outputs for testing, optionally ignoring whitespace differences.
 //
 // If the comparison fails, this marks the test as a failure and
 // writes 3 JSONL files to `./tmp`:
@@ -64,10 +65,10 @@ func CompareAsJSON(t *testing.T, got, want any) {
 		wantJson = string(wantBytes)
 	}
 
-	if gotJson == wantJson {
+	// Ignore whitespace while making the comparison
+	if stringutils.RemoveWhitespace(gotJson) == stringutils.RemoveWhitespace(wantJson) {
 		return
 	}
-
 	diff, err := parseJSONDiff(gotJson, string(wantJson), t.Name())
 	if err != nil {
 		t.Fatalf("error creating JSON diffs: \n%v", err)

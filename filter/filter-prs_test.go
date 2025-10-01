@@ -24,8 +24,8 @@ func Test_filterJSON(t *testing.T) {
 			name: "all mergeable",
 			json: `[
 	{
-		"mergeable": "CONFLICTING",
-		"foo": 1
+		"foo": 1,
+		"mergeable": "CONFLICTING"
 	},
 	{
 		"foo": 2,
@@ -35,8 +35,8 @@ func Test_filterJSON(t *testing.T) {
 			query: `map(select(.mergeable == "CONFLICTING"))`,
 			want: `[
 	{
-		"mergeable": "CONFLICTING",
-		"foo": 1
+		"foo": 1,
+		"mergeable": "CONFLICTING"
 	}
 ]`,
 		},

@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/Bertie690/gh-pr-list/utils/strings"
+	"strings"
 	"github.com/cli/go-gh/v2/pkg/template"
 	"github.com/cli/go-gh/v2/pkg/term"
 )
@@ -18,7 +18,7 @@ import (
 func applyTemplate(queried *bytes.Buffer, tmpl string) (output string, err error) {
 	var out bytes.Buffer
 
-	if !strings.EndsWith(tmpl, "{{tablerender}}") {
+	if !strings.HasSuffix(tmpl, "{{tablerender}}") {
 		// TODO: Add an option to potentially silence this
 		fmt.Println("Template string lacks required ending {{tablerender}} call, adding one...")
 		tmpl += "{{tablerender}}";
