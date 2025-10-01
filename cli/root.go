@@ -14,14 +14,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// TODO: Find a way of auto-including version information rather than manually updating it each release
+
 var (
-	Version = "0.0.0"
+	Version = "1.0.1"
 	Commit  = ""
-	Date    = ""
-	BuiltBy = ""
+	Date    = "2025/09/30"
 )
 
 var rootCmd = &cobra.Command{
+	// TODO: Make filter and template optional with default template matching `gh pr list`
 	Use:   "gh pr-list [flags] filter template [-- ...args]",
 	Short: "A gh extension providing a simple interface for listing active PRs.",
 	Long: `A gh extension providing a simple interface for listing active PRs.
@@ -29,7 +31,7 @@ var rootCmd = &cobra.Command{
 Any additional arguments after filter and template will be passed directly to ` + "`gh pr list`" + `.
 
 For more information about JQ or Go template formatting, see ` + "`gh help formatting`.",
-	Version:      buildVersion(Version, Commit, Date, BuiltBy),
+	Version:      buildVersion(Version, Commit, Date),
 	Args:         cobra.MinimumNArgs(2),
 	SilenceUsage: false,
 }
@@ -42,16 +44,13 @@ func Execute() {
 	}
 }
 
-func buildVersion(version, commit, date, builtBy string) string {
+func buildVersion(version, commit, date string) string {
 	result := version
 	if commit != "" {
 		result += "\nCommit: " + commit
 	}
 	if date != "" {
 		result = "\nBuilt at: " + date
-	}
-	if builtBy != "" {
-		result = "\nBuilt by: " + builtBy
 	}
 	result += "\nGOOS: " + runtime.GOOS + "\nGOARCH: " + runtime.GOARCH
 	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Sum != "" {
