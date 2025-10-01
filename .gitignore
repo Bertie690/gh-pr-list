@@ -6,6 +6,10 @@
 # Editor Directories
 .vscode
 
+# Temp stuff and build output
+/gh-pr-list
+/gh-pr-list.exe
+
 tmp/
 data/
 dist/
