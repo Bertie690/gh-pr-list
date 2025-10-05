@@ -19,8 +19,10 @@ func applyTemplate(queried *bytes.Buffer, tmpl string) (output string, err error
 	var out bytes.Buffer
 
 	if !strings.HasSuffix(tmpl, "{{tablerender}}") {
-		// TODO: Add an option to potentially silence this
-		fmt.Println("Template string lacks required ending {{tablerender}} call, adding one...")
+		if (term.FromEnv().IsTerminalOutput()) {
+			// TODO: Add an option to potentially silence this
+			fmt.Println("Template string lacks required ending {{tablerender}} call, adding one...")
+		}
 		tmpl += "{{tablerender}}";
 	}
 	tm := template.New(&out, 120, term.FromEnv().IsTrueColorSupported()).Funcs(getTemplateFuncs())
