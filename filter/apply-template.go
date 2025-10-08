@@ -18,11 +18,9 @@ import (
 func applyTemplate(queried *bytes.Buffer, tmpl string) (output string, err error) {
 	var out bytes.Buffer
 
+	// Add a trailing `tablerender` call if the template doesn't end with one.
+	// This does nothing if the 
 	if !strings.HasSuffix(tmpl, "{{tablerender}}") {
-		if (term.FromEnv().IsTerminalOutput()) {
-			// TODO: Add an option to potentially silence this
-			fmt.Println("Template string lacks required ending {{tablerender}} call, adding one...")
-		}
 		tmpl += "{{tablerender}}";
 	}
 	tm := template.New(&out, getLineMax(term.FromEnv().IsTerminalOutput()), term.FromEnv().IsTrueColorSupported()).Funcs(getTemplateFuncs())
