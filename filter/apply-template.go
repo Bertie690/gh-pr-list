@@ -7,8 +7,6 @@ package filter
 
 import (
 	"bytes"
-	"fmt"
-
 	"strings"
 	"github.com/cli/go-gh/v2/pkg/template"
 	"github.com/cli/go-gh/v2/pkg/term"
@@ -19,7 +17,7 @@ func applyTemplate(queried *bytes.Buffer, tmpl string) (output string, err error
 	var out bytes.Buffer
 
 	// Add a trailing `tablerender` call if the template doesn't end with one.
-	// This does nothing if the 
+	// This does nothing if the template has no tables, so we should be fine to add it
 	if !strings.HasSuffix(tmpl, "{{tablerender}}") {
 		tmpl += "{{tablerender}}";
 	}
