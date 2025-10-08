@@ -1,8 +1,14 @@
+# Workflow to publish a new release.
+# Triggered whenever tests.yml succeeds on a push to a tag branch.
 name: release
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The numerical version of the tag to cut, either with or without the starting v prefix."
+        required: true
+        type: number
+
 permissions:
   contents: write
   id-token: write

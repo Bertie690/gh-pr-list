@@ -7,6 +7,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"os"
 )
 
@@ -20,4 +21,19 @@ func IsFile(path string) (exists bool, err error) {
 		return false, err
 	}
 	return info.IsDir(), nil
+}
+
+// AppendFile appends a string or byte slice to the named file, creating it if necessary.
+// It returns any error produced.
+func AppendFile[S ~string | ~[]byte](path string, data S) error {
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("error opening file %q: \n%w", path, err)
+	}
+	defer f.Close()
+
+	if _, err := f.Write([]byte(data)); err != nil {
+		return fmt.Errorf("error appending data to file %q: \n%w", path, err)
+	}
+	return nil
 }

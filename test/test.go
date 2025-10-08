@@ -8,12 +8,11 @@ package test
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
 
-	stringutils "github.com/Bertie690/gh-pr-list/utils/strings"
+	"github.com/Bertie690/gh-pr-list/utils"
 	"github.com/nsf/jsondiff"
 )
 
@@ -66,7 +65,7 @@ func CompareAsJSON(t *testing.T, got, want any) {
 	}
 
 	// Ignore whitespace while making the comparison
-	if stringutils.RemoveWhitespace(gotJson) == stringutils.RemoveWhitespace(wantJson) {
+	if utils.RemoveWhitespace(gotJson) == utils.RemoveWhitespace(wantJson) {
 		return
 	}
 	diff, err := parseJSONDiff(gotJson, string(wantJson), t.Name())
@@ -117,24 +116,10 @@ func parseJSONDiff(gotJSON, wantJSON, testName string) (diff string, err error) 
 			// add extra newline in header to properly delimit sections on existing files
 			header = "\n" + header
 		}
-		if err = appendFile(path, header+body+"\n"); err != nil {
+		if err = utils.AppendFile(path, header+body+"\n"); err != nil {
 			return "", err
 		}
 	}
 
 	return diff, nil
-}
-
-// appendFile appends a string or byte slice to the named file, creating it if necessary.
-func appendFile[S ~string | ~[]byte](path string, data S) error {
-	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return fmt.Errorf("error opening file %q: \n%w", path, err)
-	}
-	defer f.Close()
-
-	if _, err := f.Write([]byte(data)); err != nil {
-		return fmt.Errorf("error appending data to file %q: \n%w", path, err)
-	}
-	return nil
 }
