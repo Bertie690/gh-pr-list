@@ -45,4 +45,6 @@ In summary:
 # Contributing
 If you have any ideas for improvement, please fill out a GitHub Issue describing it.
 
+<!-- TODO: Write contributing.md for contributing -->
+
 This is my first open-source project, so any and all support is greatly appreciated!

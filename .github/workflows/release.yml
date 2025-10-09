@@ -1,13 +1,11 @@
-# Workflow to publish a new release.
-# Triggered whenever tests.yml succeeds on a push to a tag branch.
+# Workflow to publish a new binary release.
+# Triggered whenever code-quality.yml succeeds on a push to a tag branch.
 name: release
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "The numerical version of the tag to cut, either with or without the starting v prefix."
-        required: true
-        type: number
+  workflow_run:
+    workflows: ["Code Quality"]
+    branches: "v*"
+    types: completed
 
 permissions:
   contents: write
@@ -18,8 +16,18 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: cli/gh-extension-precompile@v2
+      - name: Checkout Git repository
+        uses: actions/checkout@v4
+
+      - name: Capture current date/time
+        run: echo "TIME=$(LC_ALL=C TZ=GMT date '+%a, %d %b %Y %T %Z)" >> $GITHUB_ENV
+
+      - name: Create GitHub CLI extension
+        uses: cli/gh-extension-precompile@v2
         with:
           generate_attestations: true
           go_version_file: go.mod
+          go_build_options: "-ldflags=\"-s -w \
+            -X 'github.com/Bertie690/gh-pr-list/cli.version=${{ github.action_ref }}' \
+            -X 'github.com/Bertie690/gh-pr-list/cli.commit=${{ github.sha }}' \
+            -X 'github.com/Bertie690/gh-pr-list/cli.buildTime=\"$TIME\"'\""

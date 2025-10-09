@@ -1,14 +1,13 @@
 # SPDX-License-Identifier: CC0-1.0
 
-# Test binary, built with `go test -c`
-*.test
-
 # Editor Directories
 .vscode
 
-# Temp stuff and build output
+# Temp binaries and build output
 /gh-pr-list
 /gh-pr-list.exe
+*.test
+debug_*
 
 tmp/
 data/

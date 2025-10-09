@@ -1,0 +1,32 @@
+# .golangci.yml
+version: "2"
+run:
+  timeout: 3m
+  tests: true
+  go: "1.25"
+
+formatters:
+  enable:
+    - gofumpt
+  settings:
+    gofumpt:
+      extra-rules: true
+
+linters:
+  enable:
+    - gosimple
+    - govet
+    - staticcheck
+    - errcheck
+    - ineffassign
+    - gofumpt # Format check; pairs with the gofumpt formatter
+  settings:
+    errcheck:
+      # Catch unchecked errors, but allow _ in tests.
+      exclude-functions:
+        - (*testing.T).Error
+        - (*testing.T).Fatal
+        - (*testing.T).Fatalf
+        - (*testing.T).Log
+        - (*testing.T).Logf
+        - (*testing.T).Errorf
