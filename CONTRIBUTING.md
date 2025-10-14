@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2025 Matthew Taylor <taylormw163@gmail.com>
+SPDX-License-Identifier: CC-BY-NC-SA-4.0
+-->
+
 # Contributing
 
 ## Prerequisites
