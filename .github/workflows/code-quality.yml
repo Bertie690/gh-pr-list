@@ -61,13 +61,13 @@ jobs:
         if: always()
 
   golangci:
-    name: Perform GolangCI linting
+    name: Lint with golangci
     runs-on: ubuntu-latest
+
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
 
-      # build & test
       - name: Setup Go environment
         uses: actions/setup-go@v5
         with:
@@ -79,3 +79,14 @@ jobs:
         uses: golangci/golangci-lint-action@v8
         with:
           version: v2.1
+
+  reuse:
+    name: Check REUSE compliance
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Run REUSE Compliance Check
+        uses: fsfe/reuse-action@v6

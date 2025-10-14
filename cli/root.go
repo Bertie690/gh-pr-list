@@ -6,8 +6,7 @@
 package cli
 
 import (
-	"fmt"
-	// "os"
+	"os"
 	"runtime"
 	"runtime/debug"
 	"strings"
@@ -20,7 +19,7 @@ import (
 var (
 	version   = "0.0.0-develop"
 	commit    = "local"
-	buildTime string 
+	buildTime = "Eventually"
 )
 
 var rootCmd = &cobra.Command{
@@ -40,11 +39,10 @@ For more information about JQ or Go template formatting, see ` + "`gh help forma
 func Execute() {
 	rootCmd.Version = versionText(version, commit, buildTime)
 	rootCmd.SetVersionTemplate(`gh-pr-list {{printf "%s\n" .Version}}`)
-	fmt.Println(versionText(version, commit, buildTime))
-	// err := rootCmd.Execute()
-	// if err != nil {
-	// 	os.Exit(1)
-	// }
+	err := rootCmd.Execute()
+	if err != nil {
+		os.Exit(1)
+	}
 }
 
 // versionText gets the versioning text from the version, commit and build time.

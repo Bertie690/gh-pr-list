@@ -16,6 +16,11 @@ This extension was created to fill that niche, alongside providing other assorte
 gh extension install Bertie690/gh-pr-list
 ```
 
+# Usage
+`gh pr-list [flags] filter template [-- ...args]`
+
+<!-- TODO: Add mention of configuration files once implemented -->
+
 If you have a preferred formatting, you can set that as an alias:
 ```bash
 gh alias set show-prs $'pr list \'map(select(.mergeable == "CONFLICTING"))\' \'{{range .}}{{tablerow ((autocolor (colorstate .) (printf "#%v" .number)) | hyperlink .url) (truncate 50 .title) .headRefName (timeago .updatedAt)}}{{end}}\''
@@ -24,12 +29,12 @@ gh alias set show-prs $'pr list \'map(select(.mergeable == "CONFLICTING"))\' \'{
 > [!CAUTION]
 > Make sure to use strong quoting when passing a template to avoid unintended shell expansion!
 
-# Template Functions
+## Extra Template Functions
 
-A few helper functions are also added for use inside templates (in addition to the ones offered by `gh pr list`).
+A few helper functions are also added for use inside templates (in addition to the default ones offered by `gh pr list`).
 The full list is as follows:
 
- - `colorhex`: Colors a string based on the provided hex code
+ - `colorhex`: Colors a string based on the provided hex code. Like the built-in `autocolor`, will not color output passed to a terminal.
  - `colorstate`: Returns a color string passable to the `color` or `autocolor` functions based on a PR's state and draft status. Use like so: \
     `(printf "#%v" .number) | autocolor (colorstate .)`
 
@@ -43,8 +48,6 @@ In summary:
 - Auto-generated files produced by external tools or files of insigifnicant originality are not copyrighted and are licensed under [CC0-1.0](LICENSES/CC0-1.0.txt)
 
 # Contributing
-If you have any ideas for improvement, please fill out a GitHub Issue describing it.
-
-<!-- TODO: Write contributing.md for contributing -->
+If you find any bugs or ideas for improvement, feel free to fill out a [GitHub Issue](https://github.com/Bertie690/gh-pr-list/issues) describing it.
 
 This is my first open-source project, so any and all support is greatly appreciated!
