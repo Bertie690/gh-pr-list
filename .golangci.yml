@@ -3,14 +3,16 @@ version: "2"
 run:
   timeout: 3m
   tests: true
-  go: "1.25"
 
 formatters:
+  enable:
+    - gofumpt
   settings:
     gofumpt:
       extra-rules: true
 
 linters:
+  default: standard
   settings:
     errcheck:
       # Catch unchecked errors, but allow _ in tests.

@@ -1,4 +1,6 @@
 <!--
+SPDX-FileCopyrightText: 2025 Matthew Taylor <taylormw163@gmail.com>
+
 SPDX-License-Identifier: CC-BY-NC-SA-4.0
 -->
 
@@ -49,5 +51,7 @@ In summary:
 
 # Contributing
 If you find any bugs or ideas for improvement, feel free to fill out a [GitHub Issue](https://github.com/Bertie690/gh-pr-list/issues) describing it.
+
+Meanwhile, for those seeking to work on the repo themself, see [CONTRIBUTING.md](./CONTRIBUTING.md) for information about setting up a local installation.
 
 This is my first open-source project, so any and all support is greatly appreciated!

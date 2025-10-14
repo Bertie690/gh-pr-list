@@ -6,6 +6,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -25,10 +26,18 @@ func isCI() bool {
 	return os.Getenv("CI") != ""
 }
 
-// Run gofumpt code quality checks.
+// Run golangci-lint code quality checks.
 func Lint() error {
-	fmt.Println("Running gofumpt linting checks...")
-	cmd := exec.Command("go", "tool", "golangci.yml")
+	path, err := exec.LookPath("golangci-lint")
+	if errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("golangci-lint executable not found in PATH")
+	} else if err != nil {
+		return fmt.Errorf("Unknown error found when retrieving golangci-lint path: %w", err)
+	}
+
+	fmt.Println("Found golangci-lint binary at", path)
+
+	cmd := exec.Command("golangci-lint", "run")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
@@ -38,7 +47,7 @@ func cleanTmpDir() error {
 	if err := os.RemoveAll("tmp"); err != nil {
 		return mg.Fatalf(1, "error cleaning out tmp dir: \n%w", err)
 	}
-	if err := os.Mkdir("tmp", 0755); err != nil {
+	if err := os.Mkdir("tmp", 0o755); err != nil {
 		return mg.Fatalf(1, "error recreating tmp dir: \n%w", err)
 	}
 	return nil
@@ -141,10 +150,10 @@ func Merge_Temp_JSON() error {
 		path := filepath.Join("tmp", prefix+".jsonl") // got.jsonl, want.jsonl, etc.
 
 		// Add a header mentioning which package we're in to the start of the file
-		contents := fmt.Sprintf("// %s\n%s",strings.ToUpper(pkgName), string(fileBytes))
+		contents := fmt.Sprintf("// %s\n%s", strings.ToUpper(pkgName), string(fileBytes))
 		if count == 0 {
 			// truncate file if it already exists; otherwise add a newline delimiter
-			if err := os.WriteFile(path, []byte(contents), 0644); err != nil {
+			if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
 				return mg.Fatalf(1, "error truncating file contents: \n%w", err)
 			}
 		} else if err := utils.AppendFile(path, "\n"+contents); err != nil {
