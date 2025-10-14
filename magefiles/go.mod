@@ -2,8 +2,13 @@ module github.com/Bertie690/gh-pr-list/magefiles
 
 go 1.25.1
 
+// Replace directives aren't usually recommended to be left in prod builds, but this entire directory
+// is solely used for workflows so it's fine
+replace github.com/Bertie690/gh-pr-list => ../
+
 require (
 	github.com/Bertie690/gh-pr-list v1.0.4
+	github.com/fatih/color v1.18.0
 	github.com/magefile/mage v1.15.0
 )
 
@@ -62,10 +67,9 @@ require (
 	github.com/denis-tingaikin/go-header v0.5.0 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/ettle/strcase v0.2.0 // indirect
-	github.com/fatih/color v1.18.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/firefart/nonamedreturns v1.0.6 // indirect
-	github.com/fsnotify/fsnotify v1.5.4 // indirect
+	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/fzipp/gocyclo v0.6.0 // indirect
 	github.com/ghostiam/protogetter v0.3.16 // indirect
 	github.com/go-critic/go-critic v0.13.0 // indirect
@@ -206,7 +210,7 @@ require (
 	golang.org/x/mod v0.28.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
-	golang.org/x/term v0.30.0 // indirect
+	golang.org/x/term v0.35.0 // indirect
 	golang.org/x/text v0.29.0 // indirect
 	golang.org/x/tools v0.37.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect

@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2025 Matthew Taylor <taylormw163@gmail.com>
+// SPDX-FileContributor: Matthew Taylor (Bertie690)
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package main
 
 import (
@@ -9,20 +14,21 @@ import (
 	"strings"
 
 	"github.com/Bertie690/gh-pr-list/utils"
+	"github.com/fatih/color"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 )
 
-// is_CI reports whether the current process is running in CI (continuous integration)
+// isCI reports whether the current process is running in CI (continuous integration)
 // by checking the "CI" environment variable.
-func is_CI() bool {
+func isCI() bool {
 	return os.Getenv("CI") != ""
 }
 
 // Run gofumpt code quality checks.
 func Lint() error {
 	fmt.Println("Running gofumpt linting checks...")
-	cmd := exec.Command("go", "tool", "gofumpt")
+	cmd := exec.Command("go", "tool", "golangci.yml")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
@@ -38,63 +44,51 @@ func cleanTmpDir() error {
 	return nil
 }
 
-// Run backend tests using gotestsum, passing args to "go test".
+// Run backend tests using gotestsum, passing any provided args to "go test".
 // CI runs will always run all tests across all packages,
 // whereas non-CI runs can specify which package(s) to run as part of goTestArgs.
 // If a package identifier is omitted on non-CI runs,
 // it will default to running everything ("./...").
 func Test(goTestArgs string) error {
-	// NB: This _should_ take ...string[] as an argument, but mage doesn't support variadic arguments at the moment
-	// a workaround is passing a "" as the first argument
-	fmt.Println("Running backend tests...")
+	// NB: This _should_ take ...string as an argument, but mage doesn't support variadic arguments at the moment.
+	// A workaround is passing a "" as the first argument
+
 	mg.Deps(cleanTmpDir)
 
-	// read gotestsum config args from text file;
-	// use CI config if on CI; else regular config
-	var filePath string
-	if is_CI() {
-		fmt.Println("CI run detected; using CI config")
-		filePath = "gotestsum/gotestsum_ci.config.txt"
+	// Change args if on CI (different reporter for gh actions, etc.)
+	var args []string
+	if isCI() {
+		fmt.Println(utils.ColorHex("CI run detected; using CI config", "#ffa500"))
+		args = testArgsCI
 	} else {
-		fmt.Println("Non-CI run detected; using default config")
-		filePath = "gotestsum/gotestsum.config.txt"
+		fmt.Println(utils.ColorHex("Non-CI run detected; using normal config", "#ffa500"))
+		args = testArgsLocal
 	}
-
-	configBytes, err := os.ReadFile(filePath)
-	if err != nil {
-		return mg.Fatalf(1, "error reading gotestsum config file: \n%w", err)
-	}
-
-	// extract config values delimited by commas and whitespace
-	configVals := strings.FieldsFunc(string(configBytes), func(r rune) bool {
-		return (r == ',' || r == ' ' || r == '\r' || r == '\n')
-	})
-	fmt.Printf("Config file at %s successfully read.\n", filePath)
 
 	// If the user forgot to add a package mark for non-CI runs,
 	// do them a favor rather than outright failing.
 	// CI runs are exempt from this due to rerun-fails requiring an explicit package argument
 	// (not to mention their entire *job* is to test everything)
-	args := strings.Fields(goTestArgs)
-	if !is_CI() && slices.IndexFunc(args, func(s string) bool {
+	cliArgs := strings.Fields(goTestArgs)
+	if !isCI() && slices.IndexFunc(cliArgs, func(s string) bool {
 		return strings.HasPrefix(s, "./")
 	}) == -1 {
-		fmt.Println("No package identifier found; defaulting to running everything")
-		args = append([]string{"./..."}, args...)
+		fmt.Println(color.BlueString("No package identifier found; defaulting to running everything"))
+		cliArgs = append(cliArgs, "./...")
 	}
 
-	// tack on whatever config vals were passed by the user
-	configVals = append(configVals, args...)
+	// tack on whatever config vals were passed by the user, separated by a double dash
+	args = append(args, cliArgs...)
 
-	// get package name, deferring to $GITHUB_REPOSITORY (workflow runs) if present
+	// Get package name for JUnit XML reports, deferring to $GITHUB_REPOSITORY env var if present
 	pkgName := "gh-pr-list"
 	if r := strings.TrimSpace(os.Getenv("GITHUB_REPOSITORY")); r != "" {
 		pkgName = r
 	}
 
-	// merge together any temporary json files together once we're done testing.
+	// Merge together any temporary json files together once we're done testing.
 	// We do this now to save time - if the prior steps fail,
-	// there won't be any JSON files to merge)
+	// there won't be any JSON files to merge
 	defer func() {
 		if err := Merge_Temp_JSON(); err != nil {
 			fmt.Printf("error merging temp JSON diffs after test run:\n%v\n", err)
@@ -102,10 +96,10 @@ func Test(goTestArgs string) error {
 	}()
 
 	return sh.RunWithV(map[string]string{"PKGNAME": pkgName},
-		configVals[0], configVals[1:]...) // "go", "tool", "gotest.tools/gotestsum"...
+		"go", args...) // "go", "tool", "gotest.tools/gotestsum", ...
 }
 
-// Remove all temp json files produced during tests and merge them together.
+// Remove all temporary json files produced during tests and merge them together.
 // This takes all files matching the format "XXX_**.jsonl",
 // and merges them together into a single file named "XXX.jsonl".
 // Comments are added between failing tests from different packages.
@@ -127,17 +121,16 @@ func Merge_Temp_JSON() error {
 	count := 0
 	for _, fileName := range fileNames {
 		fullName := filepath.Join("tmp", fileName)
+		// skip non JSONL files or ones without underscores
 		if !strings.HasSuffix(fileName, ".jsonl") {
 			continue
 		}
-
 		prefix, pkgName, found := strings.Cut(fileName, "_")
 		if !found {
-			// file name has no underscores, so it 100% isn't a preformatted JSON file
 			continue
 		}
 
-		// cut out file extension to extract package name
+		// cut out file extension to extract actual package name
 		pkgName, _ = strings.CutSuffix(pkgName, ".jsonl")
 
 		// grab file data
@@ -148,16 +141,14 @@ func Merge_Temp_JSON() error {
 		path := filepath.Join("tmp", prefix+".jsonl") // got.jsonl, want.jsonl, etc.
 
 		// Add a header mentioning which package we're in to the start of the file
-		contents := "//* " +
-			strings.ToUpper(pkgName) + "\n" +
-			string(fileBytes)
+		contents := fmt.Sprintf("// %s\n%s",strings.ToUpper(pkgName), string(fileBytes))
 		if count == 0 {
 			// truncate file if it already exists; otherwise add a newline delimiter
 			if err := os.WriteFile(path, []byte(contents), 0644); err != nil {
-				return mg.Fatalf(1, "error during os.WriteFile: \n%w", err)
+				return mg.Fatalf(1, "error truncating file contents: \n%w", err)
 			}
 		} else if err := utils.AppendFile(path, "\n"+contents); err != nil {
-			return mg.Fatalf(1, "error during test.AppendFile: \n%w", err)
+			return mg.Fatalf(1, "error during utils.AppendFile: \n%w", err)
 		}
 
 		count++

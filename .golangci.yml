@@ -6,20 +6,11 @@ run:
   go: "1.25"
 
 formatters:
-  enable:
-    - gofumpt
   settings:
     gofumpt:
       extra-rules: true
 
 linters:
-  enable:
-    - gosimple
-    - govet
-    - staticcheck
-    - errcheck
-    - ineffassign
-    - gofumpt # Format check; pairs with the gofumpt formatter
   settings:
     errcheck:
       # Catch unchecked errors, but allow _ in tests.

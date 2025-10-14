@@ -11,6 +11,7 @@ import (
 	"testing"
 )
 
+// Cleanup temp JSON files for build processing.
 func TestMain(m *testing.M) {
 	m.Run()
 
