@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2025 Matthew Taylor <taylormw163@gmail.com>
+// SPDX-FileContributor: Matthew Taylor (Bertie690)
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package main
 
 // Array containing default gotestsum arguments for CI builds.
@@ -8,7 +13,7 @@ var testArgsCI = []string{
 	"--format-hide-empty-pkg",
 	"--rerun-fails=2",
 	"--rerun-fails-run-root-test",
-	"--rerun-fails-report tmp/test-results/gotestsum-flake-report.txt",
+	"--rerun-fails-report=tmp/test-results/gotestsum-flake-report.txt",
 	"--packages ./...",
 	"--junitfile=tmp/test-results/go-test-report.xml",
 	"--junitfile-hide-empty-pkg",

@@ -18,6 +18,9 @@ on:
 permissions:
   contents: read
 
+env:
+  go_version: 1.25.1
+
 jobs:
   test:
     name: Run Go tests
@@ -30,7 +33,7 @@ jobs:
       - name: Setup Go environment
         uses: actions/setup-go@v5
         with:
-          go-version: stable
+          go-version: ${{ env.go_version }}
           check-latest: true
           cache: true
 
@@ -71,7 +74,7 @@ jobs:
       - name: Setup Go environment
         uses: actions/setup-go@v5
         with:
-          go-version: stable
+          go-version: ${{ env.go_version }}
           check-latest: true
           cache: true
 
