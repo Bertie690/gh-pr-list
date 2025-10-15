@@ -176,6 +176,6 @@ func Merge_Temp_JSON() error {
 	} else {
 		message = "No JSON files to merge were found."
 	}
-	logIfVerbose(message);
+	logIfVerbose(message)
 	return nil
 }
