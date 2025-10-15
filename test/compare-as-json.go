@@ -3,24 +3,27 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// Package test contains some useful test utilities.
+// Package test contains some useful utility functions for testing.
+//
+// It should not be used in production.
 package test
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
-	stringutils "github.com/Bertie690/gh-pr-list/utils/strings"
+	"github.com/Bertie690/gh-pr-list/utils"
 	"github.com/nsf/jsondiff"
 )
 
-// CompareAsJSON compares 2 objects as JSON outputs for testing, optionally ignoring whitespace differences.
+// CompareAsJSON compares 2 objects as JSON outputs for testing.
 //
-// If the comparison fails, this marks the test as a failure and
-// writes 3 JSONL files to `./tmp`:
+// If the comparison fails, this marks the current test as a failure and
+// writes 3 JSONL files to the [ResultsDir] directory:
 //   - `got.jsonl` contains serialized versions of `got`
 //   - `want.jsonl` contains serialized versions of `want`
 //   - `diff.jsonl` contains a pretty-printed difference between the two JSON objects
@@ -29,18 +32,18 @@ import (
 // This json difference is passed to [testing.T.Errorf] as well for ease of use.
 //
 // These files are continuously appended to during a test run (sectioned off by test name),
-// and must be moved or removed after the package finishes testing (such as [TestMain]).
+// and must be moved or removed after the package finishes testing via [TestMain] or similar.
 // Invocation from parallel tests is untested and not recommended.
 //
-// Failures to parse JSON will halt test execution and fail immediately.
+// A failure to parse JSON will halt test execution and fail immediately.
 //
 // [TestMain]: https://pkg.go.dev/testing#hdr-Main
+// [ResultsDir]: https://pkg.go.dev/github.com/Bertie690/gh-pr-list/test#ResultsDir
 func CompareAsJSON(t *testing.T, got, want any) {
-	t.Helper()
-
 	if got == nil && want == nil {
 		return
 	} else if (got == nil) != (want == nil) { // one is nil and the other isn't
+		t.Helper()
 		t.Errorf("Unequal values (nilness): got = %v, want = %v", got, want)
 	}
 
@@ -66,7 +69,7 @@ func CompareAsJSON(t *testing.T, got, want any) {
 	}
 
 	// Ignore whitespace while making the comparison
-	if stringutils.RemoveWhitespace(gotJson) == stringutils.RemoveWhitespace(wantJson) {
+	if utils.RemoveWhitespace(gotJson) == utils.RemoveWhitespace(wantJson) {
 		return
 	}
 	diff, err := parseJSONDiff(gotJson, string(wantJson), t.Name())
@@ -77,6 +80,7 @@ func CompareAsJSON(t *testing.T, got, want any) {
 	// Remove block comments in the stdout version since we value clutter-free output over valid syntax
 	r := strings.NewReplacer("/* ", "", " */", ":")
 
+	t.Helper()
 	t.Errorf("JSONs not equal; diff between got & want: \n%s", r.Replace(diff))
 }
 
@@ -92,49 +96,43 @@ var options = jsondiff.Options{
 	SkipMatches:      true,
 }
 
-// Parse JSON diffs, creating files to log values as appropriate.
+// parseJSONDiff parses and diffs a pair of JSON outputs, creating files to log values as appropriate.
+// It returns the human-readable diff output, as well as any error produced.
+//
+// A non-nil error is always accompanied by an empty diff string.
 func parseJSONDiff(gotJSON, wantJSON, testName string) (diff string, err error) {
 	_, diff = jsondiff.Compare([]byte(gotJSON), []byte(wantJSON), &options)
+	header := "// " + testName + "\n"
 
-	os.MkdirAll("../tmp", 0755)
+	if err := os.MkdirAll(ResultsDir, 0o755); err != nil {
+		return "", err
+	}
 	for i := range 3 {
-		var path string
-		var body string
+		var file, body string
 		switch i {
 		case 0:
-			path = "../tmp/got.jsonl"
+			file = "got.jsonl"
 			body = gotJSON
 		case 1:
-			path = "../tmp/want.jsonl"
+			file = "want.jsonl"
 			body = wantJSON
 		case 2:
-			path = "../tmp/diff.jsonl"
+			file = "diff.jsonl"
 			body = diff
 		}
+		path := filepath.Join(ResultsDir, file)
 
-		header := "// " + testName + "\n" // header containing test name & extra newlines
-		if _, err := os.Stat(path); err == nil {
+		if _, err = os.Stat(path); err == nil {
 			// add extra newline in header to properly delimit sections on existing files
 			header = "\n" + header
+		} else if !errors.Is(err, os.ErrNotExist) {
+			return "", err
 		}
-		if err = appendFile(path, header+body+"\n"); err != nil {
+
+		if err = utils.AppendFile(path, header+body+"\n"); err != nil {
 			return "", err
 		}
 	}
 
 	return diff, nil
-}
-
-// appendFile appends a string or byte slice to the named file, creating it if necessary.
-func appendFile[S ~string | ~[]byte](path string, data S) error {
-	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return fmt.Errorf("error opening file %q: \n%w", path, err)
-	}
-	defer f.Close()
-
-	if _, err := f.Write([]byte(data)); err != nil {
-		return fmt.Errorf("error appending data to file %q: \n%w", path, err)
-	}
-	return nil
 }

@@ -1,0 +1,24 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Executable",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/gh-pr-list.go",
+            "args": ["${{input:buildArgs}}"]
+        }
+    ],
+    "inputs": [
+        {
+            "id": "buildArgs",
+            "description": "Arguments to pass to the command-line executable.",
+            "type": "promptString",
+            "default": "help"
+        }
+    ]
+}

@@ -15,13 +15,13 @@ import (
 
 // SprintColorHex colors a string according to a hex code and returns it.
 // It supports formatting directives similar to [fmt.Sprintf].
-func SprintColorHex(hex string, s string, args ...any) string {
-	return color.RGB(rgbToHex(hex)).Sprintf(s, args...)
+func SprintColorHex(str, hex string, args ...any) string {
+	return color.RGB(rgbToHex(hex)).Sprintf(str, args...)
 }
 
 // ColorHex colors a string according to a hex code and returns it.
-func ColorHex(hex string, s string) string {
-	return color.RGB(rgbToHex(hex)).Sprint(s)
+func ColorHex(str, hex string) string {
+	return color.RGB(rgbToHex(hex)).Sprint(str)
 }
 
 func rgbToHex(hex string) (r int, g int, b int) {
