@@ -10,6 +10,7 @@ require (
 	github.com/Bertie690/gh-pr-list v1.0.4
 	github.com/fatih/color v1.18.0
 	github.com/magefile/mage v1.15.0
+	golang.org/x/text v0.29.0
 )
 
 require (

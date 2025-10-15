@@ -19,6 +19,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
+	"golang.org/x/text/cases"
 )
 
 // Run golangci-lint code quality checks.
@@ -47,26 +48,28 @@ func Test(goTestArgs string) error {
 	// NB: This _should_ take ...string as an argument, but mage doesn't support variadic arguments at the moment.
 	// A workaround is passing a "" as the first argument
 
-	args := getTestArgs(goTestArgs)
+	mg.Deps(cleanTmpDir)
 
-	// Merge together any temporary json files together once we're done testing.
-	// We do this now to save time - if the prior steps fail,
-	// there won't be any JSON files to merge
-	defer func() {
-		if err := Merge_Temp_JSON(); err != nil {
-			fmt.Printf("error merging temp JSON diffs after test run:\n%v\n", err)
-		}
-	}()
+	args := getTestArgs(goTestArgs)
 
 	logIfVerbose("Running gotestsum with args: %q\n", args)
 
-	// Exit immediately if the command ran and a non-zero exit code was reported.
-	// This avoids printing a "XYZ failed" error message on top of the gotestsum report
 	ran, err := sh.Exec(nil, os.Stdout, os.Stderr, "go", args...) // "go", "tool", "gotest.tools/gotestsum", ...
-	if ran && mg.ExitStatus(err) != 0 {
-		os.Exit(mg.ExitStatus(err))
+	if !ran || mg.ExitStatus(err) == 0 {
+		return err
 	}
-	return err
+
+	// Merge together any temporary json files produced by test failures.
+	// We do this after the exit status check as a successful test run
+	// won't have any test files to merge
+	if err := Merge_Temp_JSONL(); err != nil {
+		return err
+	}
+
+	// Exit without returning an error.
+	// This avoids having Mage re-log the error message twice.
+	os.Exit(mg.ExitStatus(err))
+	return nil
 }
 
 // getTestArgs obtains the arguments passed to gotestsum.
@@ -112,54 +115,59 @@ func processBaseArgs(baseArgs string) []string {
 	return strings.Fields(baseArgs)
 }
 
+// cleanTmpDir removes and re-creates the test results directory before running tests.
+func cleanTmpDir() error {
+	if err := os.RemoveAll(test.ResultsDir); err != nil {
+		return mg.Fatalf(1, "error cleaning out tmp dir: \n%w", err)
+	}
+	return nil
+}
+
 // Remove all temporary json files produced during tests and merge them together.
-// This takes all files matching the format "XXX_**.jsonl",
+// This takes all files inside [test.ResultsDir] matching the format "**_*.jsonl",
 // and merges them together into a single file named "XXX.jsonl".
 // Comments are added between failing tests from different packages.
-func Merge_Temp_JSON() error {
-	tmpdir, err := os.Open(test.ResultsDir)
-	// No temp dir makes our job easy
-	if errors.Is(err, os.ErrNotExist) {
-		return nil
-	} else if err != nil {
-		return mg.Fatalf(1, "error while opening temp folder: \n%w", err)
-	}
-	fileNames, err := tmpdir.Readdirnames(-1)
+func Merge_Temp_JSONL() error {
+	logIfVerbose("Merging temporary JSONL files inside %q", test.ResultsDir)
+	fileNames, err := filepath.Glob(filepath.Join(test.ResultsDir, "**_*.jsonl"))
 	if err != nil {
-		return mg.Fatalf(1, "error while reading temp folder files: \n%w", err)
+		return mg.Fatalf(1, "error during filepath.Glob: \n%w", err)
 	}
 
 	count := 0
-	for _, fileName := range fileNames {
-		fullPath := filepath.Join(test.ResultsDir, fileName)
-		// skip non-JSONL files or ones without underscores
-		if !strings.HasSuffix(fileName, ".jsonl") {
-			continue
-		}
+	for _, fullPath := range fileNames {
+		fileName := filepath.Base(fullPath)
 		prefix, pkgName, found := strings.Cut(fileName, "_")
 		if !found {
+			logIfVerbose("Skipping non-diff file %q", fileName)
 			continue
 		}
 
 		// cut out file extension to extract actual package name
-		pkgName, _ = strings.CutSuffix(pkgName, ".jsonl")
+		pkgName, found = strings.CutSuffix(pkgName, ".jsonl")
+		if !found {
+			logIfVerbose("Skipping non-JSONL file %q", fileName)
+			continue
+		}
+
+		logIfVerbose("Found JSONL file %q", fileName)
 
 		// grab file data
 		fileBytes, err := os.ReadFile(fullPath)
 		if err != nil {
 			return mg.Fatalf(1, "error during os.ReadFile: \n%w", err)
 		}
-		path := filepath.Join(test.ResultsDir, prefix+".jsonl") // got.jsonl, want.jsonl, etc.
+		newPath := filepath.Join(test.ResultsDir, prefix+".jsonl") // got.jsonl, want.jsonl, etc.
 
 		// Add a header mentioning which package we're in to the start of the file
-		contents := fmt.Sprintf("// %s\n%s", strings.ToUpper(pkgName), string(fileBytes))
+		contents := fmt.Sprintf("// %s\n%s", cases.Title(pkgName), string(fileBytes))
 
 		// create/truncate file if running first time; otherwise append with newline delimiter
 		if count == 0 {
-			if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
+			if err := os.WriteFile(newPath, []byte(contents), 0o644); err != nil {
 				return mg.Fatalf(1, "error during os.WriteFile: \n%w", err)
 			}
-		} else if err := utils.AppendFile(path, "\n"+contents); err != nil {
+		} else if err := utils.AppendFile(newPath, "\n"+contents); err != nil {
 			return mg.Fatalf(1, "error during utils.AppendFile: \n%w", err)
 		}
 
@@ -172,7 +180,7 @@ func Merge_Temp_JSON() error {
 
 	var message string
 	if count > 0 {
-		message = fmt.Sprintf("Successfully merged a total of %d temp json files together at %q.", count, test.ResultsDir)
+		message = fmt.Sprintf("Successfully merged a total of %d temp json files together at %s", count, test.ResultsDir)
 	} else {
 		message = "No JSON files to merge were found."
 	}

@@ -8,7 +8,9 @@ package test
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -36,11 +38,10 @@ import (
 // [TestMain]: https://pkg.go.dev/testing#hdr-Main
 // [ResultsDir]: https://pkg.go.dev/github.com/Bertie690/gh-pr-list/test#ResultsDir
 func CompareAsJSON(t *testing.T, got, want any) {
-	t.Helper()
-
 	if got == nil && want == nil {
 		return
 	} else if (got == nil) != (want == nil) { // one is nil and the other isn't
+		t.Helper()
 		t.Errorf("Unequal values (nilness): got = %v, want = %v", got, want)
 	}
 
@@ -77,6 +78,7 @@ func CompareAsJSON(t *testing.T, got, want any) {
 	// Remove block comments in the stdout version since we value clutter-free output over valid syntax
 	r := strings.NewReplacer("/* ", "", " */", ":")
 
+	t.Helper()
 	t.Errorf("JSONs not equal; diff between got & want: \n%s", r.Replace(diff))
 }
 
@@ -92,31 +94,39 @@ var options = jsondiff.Options{
 	SkipMatches:      true,
 }
 
-// Parse JSON diffs, creating files to log values as appropriate.
+// parseJSONDiff parses and diffs a pair of JSON outputs, creating files to log values as appropriate.
+// It returns the human-readable diff output, as well as any error produced.
+//
+// A non-nil error is always accompanied by an empty diff string.
 func parseJSONDiff(gotJSON, wantJSON, testName string) (diff string, err error) {
 	_, diff = jsondiff.Compare([]byte(gotJSON), []byte(wantJSON), &options)
+	header := "// " + testName + "\n"
 
-	os.MkdirAll(ResultsDir, 0o755)
+	if err := os.MkdirAll(ResultsDir, 0o755); err != nil {
+		return "", err
+	}
 	for i := range 3 {
-		var path string
-		var body string
+		var file, body string
 		switch i {
 		case 0:
-			path = "../tmp/got.jsonl"
+			file = "got.jsonl"
 			body = gotJSON
 		case 1:
-			path = "../tmp/want.jsonl"
+			file = "want.jsonl"
 			body = wantJSON
 		case 2:
-			path = "../tmp/diff.jsonl"
+			file = "diff.jsonl"
 			body = diff
 		}
+		path := filepath.Join(ResultsDir, file)
 
-		header := "// " + testName + "\n" // header containing test name & extra newlines
-		if _, err := os.Stat(path); err == nil {
+		if _, err = os.Stat(path); err == nil {
 			// add extra newline in header to properly delimit sections on existing files
 			header = "\n" + header
+		} else if !errors.Is(err, os.ErrNotExist) {
+			return "", err
 		}
+
 		if err = utils.AppendFile(path, header+body+"\n"); err != nil {
 			return "", err
 		}

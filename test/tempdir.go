@@ -1,9 +1,11 @@
 package test
 
 import (
+	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 
+	"github.com/Bertie690/gh-pr-list/internal/projectpath"
 	"github.com/Bertie690/gh-pr-list/utils"
 )
 
@@ -15,8 +17,9 @@ var ResultsDir string
 
 func init() {
 	if utils.IsCI {
-		ResultsDir = path.Join(os.TempDir(), "test-results")
+		ResultsDir = filepath.Join(os.TempDir(), "test-results")
 	} else {
-		ResultsDir = "tmp"
+		ResultsDir = filepath.Join(projectpath.Root, "tmp")
+		fmt.Println(ResultsDir)
 	}
 }

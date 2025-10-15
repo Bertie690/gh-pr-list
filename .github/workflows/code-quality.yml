@@ -20,7 +20,6 @@ permissions:
 
 env:
   go_version: 1.25.1
-  tmpDiffsDir: tmp/diffs
 
 jobs:
   test:
@@ -51,7 +50,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gotestsum-report
-          path: /tmp/test-results
+          path: /tmp/test-results/**
           overwrite: true
           retention-days: 7
         if: always()

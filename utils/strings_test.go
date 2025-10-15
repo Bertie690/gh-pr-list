@@ -36,7 +36,7 @@ func TestRemoveWhitespace(t *testing.T) {
 		"mergeable": "CONFLICTING"
 	}
 ]`,
-			want: `[{"foo": 1,"mergeable":"CONFLICTING"}]`,
+			want: `[{"foo":1,"mergeable":"CONFLICTING"}]`,
 		},
 	}
 	for _, tt := range tests {
