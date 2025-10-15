@@ -11,7 +11,7 @@ import (
 
 // The directory where temporary diffs and other test results are stored.
 //
-// Located within the current directory for non-CI runs to allow for easier manual checking,
+// Located within the project root directory for non-CI runs to allow for easier manual checking,
 // or inside a subdirectory of [os.TempDir] on CI for performance.
 var ResultsDir string
 

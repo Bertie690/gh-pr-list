@@ -19,7 +19,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
-	"golang.org/x/text/cases"
 )
 
 // Run golangci-lint code quality checks.
@@ -160,7 +159,7 @@ func Merge_Temp_JSONL() error {
 		newPath := filepath.Join(test.ResultsDir, prefix+".jsonl") // got.jsonl, want.jsonl, etc.
 
 		// Add a header mentioning which package we're in to the start of the file
-		contents := fmt.Sprintf("// %s\n%s", cases.Title(pkgName), string(fileBytes))
+		contents := fmt.Sprintf("// Package %s\n//\n%s", pkgName, string(fileBytes))
 
 		// create/truncate file if running first time; otherwise append with newline delimiter
 		if count == 0 {

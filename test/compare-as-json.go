@@ -3,7 +3,9 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// Package test contains some useful test utilities.
+// Package test contains some useful utility functions for testing.
+//
+// It should not be used in production.
 package test
 
 import (
