@@ -9,7 +9,9 @@ import (
 	"strings"
 )
 
-// RemoveWhitespace removes all whitespace from a string.
-func RemoveWhitespace(s string) string {
-	return strings.Join(strings.Fields(s), "")
+// RemoveWhitespace removes any and all all whitespace from a string.
+// This is distinct from [strings.TrimSpace], which only strips leading and trailing whitespace
+// (leaving ones in the middle intact).
+func RemoveWhitespace(str string) string {
+	return strings.Join(strings.Fields(str), "")
 }

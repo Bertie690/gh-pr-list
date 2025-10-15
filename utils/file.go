@@ -11,9 +11,11 @@ import (
 	"os"
 )
 
-// IsFile reports whether a file exists at path and is a directory.
-// A non-existent file will return false, nil.
-func IsFile(path string) (exists bool, err error) {
+// ExistsDir reports whether a file exists at path and is a directory.
+// A non-existent file or one that is not a directory will return `false, nil`.
+//
+// dir is always false if err is non-nil.
+func ExistsDir(path string) (isDir bool, err error) {
 	info, err := os.Stat(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return false, nil

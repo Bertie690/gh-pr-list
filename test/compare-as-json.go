@@ -16,10 +16,10 @@ import (
 	"github.com/nsf/jsondiff"
 )
 
-// CompareAsJSON compares 2 objects as JSON outputs for testing, optionally ignoring whitespace differences.
+// CompareAsJSON compares 2 objects as JSON outputs for testing.
 //
-// If the comparison fails, this marks the test as a failure and
-// writes 3 JSONL files to `./tmp`:
+// If the comparison fails, this marks the current test as a failure and
+// writes 3 JSONL files to the [ResultsDir] directory:
 //   - `got.jsonl` contains serialized versions of `got`
 //   - `want.jsonl` contains serialized versions of `want`
 //   - `diff.jsonl` contains a pretty-printed difference between the two JSON objects
@@ -28,12 +28,13 @@ import (
 // This json difference is passed to [testing.T.Errorf] as well for ease of use.
 //
 // These files are continuously appended to during a test run (sectioned off by test name),
-// and must be moved or removed after the package finishes testing (such as [TestMain]).
+// and must be moved or removed after the package finishes testing via [TestMain] or similar.
 // Invocation from parallel tests is untested and not recommended.
 //
-// Failures to parse JSON will halt test execution and fail immediately.
+// A failure to parse JSON will halt test execution and fail immediately.
 //
 // [TestMain]: https://pkg.go.dev/testing#hdr-Main
+// [ResultsDir]: https://pkg.go.dev/github.com/Bertie690/gh-pr-list/test#ResultsDir
 func CompareAsJSON(t *testing.T, got, want any) {
 	t.Helper()
 
@@ -95,7 +96,7 @@ var options = jsondiff.Options{
 func parseJSONDiff(gotJSON, wantJSON, testName string) (diff string, err error) {
 	_, diff = jsondiff.Compare([]byte(gotJSON), []byte(wantJSON), &options)
 
-	os.MkdirAll("../tmp", 0755)
+	os.MkdirAll(ResultsDir, 0o755)
 	for i := range 3 {
 		var path string
 		var body string

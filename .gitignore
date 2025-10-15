@@ -4,6 +4,9 @@
 *.test
 debug_*
 
+# Mage temp output files
+**/mage_output_file.go
+
 tmp/
 data/
 dist/

@@ -20,6 +20,7 @@ permissions:
 
 env:
   go_version: 1.25.1
+  tmpDiffsDir: tmp/diffs
 
 jobs:
   test:
@@ -27,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out Git repository
+      - name: Checkout Git repository
         uses: actions/checkout@v4
 
       - name: Setup Go environment
@@ -50,9 +51,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gotestsum-report
-          path: |
-            tmp/diff.jsonl
-            tmp/test-results/*
+          path: /tmp/test-results
           overwrite: true
           retention-days: 7
         if: always()
@@ -60,7 +59,7 @@ jobs:
       - name: Produce Test Summary
         uses: test-summary/action@v2
         with:
-          paths: "tmp/**/*-report.xml"
+          paths: "/tmp/test-results/**/*-report.xml"
         if: always()
 
   golangci:
@@ -68,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out Git repository
+      - name: Checkout Git repository
         uses: actions/checkout@v4
 
       - name: Setup Go environment
@@ -88,7 +87,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out Git repository
+      - name: Checkout Git repository
         uses: actions/checkout@v4
 
       - name: Run REUSE Compliance Check
