@@ -15,24 +15,24 @@ import (
 	"github.com/cli/go-gh/v2"
 )
 
-func CreateList(query string, template string, args []string) (err error) {
+func CreateList(query, template string, args []string) (err error) {
 	json, err := getPrs(args)
 	if err != nil {
-		return
+		return err
 	}
 
 	var queried *bytes.Buffer
 	if query == "" {
 		queried = json
-		} else {
-			queried, err = filterJSON(json, query)
+	} else {
+		queried, err = filterJSON(json, query)
 		if err != nil {
-			return
+			return err
 		}
 	}
 	output, err := applyTemplate(queried, template)
 	if err != nil {
-		return
+		return err
 	}
 	fmt.Println(output)
 	return nil

@@ -24,7 +24,7 @@ func ColorHex(str, hex string) string {
 	return color.RGB(rgbToHex(hex)).Sprint(str)
 }
 
-func rgbToHex(hex string) (r int, g int, b int) {
+func rgbToHex(hex string) (r, g, b int) {
 	// Remove leading hashtag if found
 	hex = strings.TrimLeft(hex, "#")
 

@@ -10,22 +10,22 @@ import "testing"
 func TestRemoveWhitespace(t *testing.T) {
 	tests := []struct {
 		name string
-		str    string
+		str  string
 		want string
 	}{
 		{
 			name: "No whitespace",
-			str: "12345",
+			str:  "12345",
 			want: "12345",
 		},
 		{
 			name: "Leading & Trailing",
-			str: "\n\r\t 12345\r\t\n",
+			str:  "\n\r\t 12345\r\t\n",
 			want: "12345",
 		},
 		{
 			name: "Middle whitespace",
-			str: "\nf l u\nb\tb\re\n\t r ",
+			str:  "\nf l u\nb\tb\re\n\t r ",
 			want: "flubber",
 		},
 		{

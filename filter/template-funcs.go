@@ -14,7 +14,7 @@ import (
 func getTemplateFuncs() map[string]any {
 	return map[string]any{
 		// reverse argument order so hex comes first (for consistency with `autocolor` template func)
-		"colorhex":   func (hex, str string) string {return utils.ColorHex(str, hex)},
+		"colorhex":   func(hex, str string) string { return utils.ColorHex(str, hex) },
 		"colorstate": colorPrState,
 	}
 }

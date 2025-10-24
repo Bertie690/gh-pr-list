@@ -60,7 +60,7 @@ func versionText(version, commit, buildTime string) (result string) {
 	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Sum != "" {
 		result += "\nModule version: " + info.Main.Version + "\nChecksum: %s" + info.Main.Sum
 	}
-	return
+	return result
 }
 
 func init() {
