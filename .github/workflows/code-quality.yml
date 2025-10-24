@@ -102,7 +102,7 @@ jobs:
 
     steps:
       - name: Trigger release if pushed to tag
-        if: github.event.push, 'refs/tags' )
+        if: startsWith(github.ref_name, 'refs/tags')
         run: |
           gh workflow run --ref ${{ github.ref_name }} Release
         env:
