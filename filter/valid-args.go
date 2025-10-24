@@ -42,8 +42,6 @@ var validArgs = []string{
 	"milestone",
 	"number",
 	"potentialMergeCommit",
-	"projectCards",
-	"projectItems",
 	"reactionGroups",
 	"reviewDecision",
 	"reviewRequests",

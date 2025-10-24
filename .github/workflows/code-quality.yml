@@ -1,0 +1,93 @@
+# Workflow to perform code quality checks on each commit/PR to main or a tag
+name: Code Quality
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - "main"
+  push:
+    branches:
+      - "main"
+      - "v*"
+  merge_group:
+    types: [checks_requested]
+
+  # allow manually triggering on branches
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  go_version: 1.25.1
+
+jobs:
+  test:
+    name: Run Go tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Git repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go environment
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.go_version }}
+          check-latest: true
+          cache: true
+
+      - name: Setup Mage
+        uses: magefile/mage-action@v3
+        with:
+          install-only: true
+
+      - name: Test Go Files
+        id: go-tests
+        run: mage test ""
+
+      - name: Upload gotestsum reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: gotestsum-report
+          path: /tmp/test-results/**
+          overwrite: true
+          retention-days: 7
+        if: always()
+
+      - name: Produce Test Summary
+        uses: test-summary/action@v2
+        with:
+          paths: "/tmp/test-results/**/*-report.xml"
+        if: always()
+
+  golangci:
+    name: Lint with golangci
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Git repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go environment
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.go_version }}
+          check-latest: true
+          cache: true
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.5.0
+
+  reuse:
+    name: Check REUSE compliance
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Git repository
+        uses: actions/checkout@v4
+
+      - name: Run REUSE Compliance Check
+        uses: fsfe/reuse-action@v6

@@ -9,17 +9,17 @@ import (
 	"os"
 	"runtime"
 	"runtime/debug"
+	"strings"
 
 	"github.com/Bertie690/gh-pr-list/filter"
 	"github.com/spf13/cobra"
 )
 
-// TODO: Find a way of auto-including version information rather than manually updating it each release
-
+// Version information, injected during `release.yml` via `-ldflags -X`
 var (
-	Version = "1.0.1"
-	Commit  = ""
-	Date    = "2025/09/30"
+	version   = "0.0.0-develop"
+	commit    = "local"
+	buildTime = "Eventually"
 )
 
 var rootCmd = &cobra.Command{
@@ -31,26 +31,30 @@ var rootCmd = &cobra.Command{
 Any additional arguments after filter and template will be passed directly to ` + "`gh pr list`" + `.
 
 For more information about JQ or Go template formatting, see ` + "`gh help formatting`.",
-	Version:      buildVersion(Version, Commit, Date),
 	Args:         cobra.MinimumNArgs(2),
 	SilenceUsage: false,
 }
 
 // Execute executes the command.
 func Execute() {
+	rootCmd.Version = versionText(version, commit, buildTime)
+	rootCmd.SetVersionTemplate(`gh-pr-list {{printf "%s\n" .Version}}`)
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}
 }
 
-func buildVersion(version, commit, date string) string {
-	result := version
+// versionText gets the versioning text from the version, commit and build time.
+func versionText(version, commit, buildTime string) (result string) {
+	if versionWithoutV, _ := strings.CutPrefix(version, "v"); versionWithoutV != "" {
+		result += "\nVersion: " + versionWithoutV
+	}
 	if commit != "" {
 		result += "\nCommit: " + commit
 	}
-	if date != "" {
-		result = "\nBuilt at: " + date
+	if buildTime != "" {
+		result += "\nBuilt at: " + buildTime
 	}
 	result += "\nGOOS: " + runtime.GOOS + "\nGOARCH: " + runtime.GOARCH
 	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Sum != "" {
@@ -61,7 +65,6 @@ func buildVersion(version, commit, date string) string {
 
 func init() {
 	initFlags()
-	rootCmd.SetVersionTemplate(`gh-pr-list {{printf "version %s\n" .Version}}`)
 	rootCmd.RunE = runCmd
 }
 

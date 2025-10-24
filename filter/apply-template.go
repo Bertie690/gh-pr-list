@@ -8,6 +8,7 @@ package filter
 import (
 	"bytes"
 	"strings"
+
 	"github.com/cli/go-gh/v2/pkg/template"
 	"github.com/cli/go-gh/v2/pkg/term"
 )
@@ -19,21 +20,21 @@ func applyTemplate(queried *bytes.Buffer, tmpl string) (output string, err error
 	// Add a trailing `tablerender` call if the template doesn't end with one.
 	// This does nothing if the template has no tables, so we should be fine to add it
 	if !strings.HasSuffix(tmpl, "{{tablerender}}") {
-		tmpl += "{{tablerender}}";
+		tmpl += "{{tablerender}}"
 	}
 	tm := template.New(&out, getLineMax(term.FromEnv().IsTerminalOutput()), term.FromEnv().IsTrueColorSupported()).Funcs(getTemplateFuncs())
 	if err = tm.Parse(tmpl); err != nil {
-		return
+		return output, err
 	}
 	if err = tm.Execute(queried); err != nil {
-		return
+		return output, err
 	}
 	return out.String(), nil
 }
 
 func getLineMax(isTerm bool) int {
 	// TODO: Make this configurable
-	if (isTerm) {
+	if isTerm {
 		return 120
 	}
 	return 99999
