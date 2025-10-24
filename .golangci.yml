@@ -13,6 +13,8 @@ formatters:
 
 linters:
   default: standard
+  enable:
+    - staticcheck
   settings:
     errcheck:
       # Catch unchecked errors, but allow _ in tests.
@@ -23,3 +25,4 @@ linters:
         - (*testing.T).Log
         - (*testing.T).Logf
         - (*testing.T).Errorf
+      check-type-assertions: true

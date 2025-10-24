@@ -27,12 +27,14 @@ func ExistsDir(path string) (isDir bool, err error) {
 
 // AppendFile appends a string or byte slice to the named file, creating it if necessary.
 // It returns any error produced.
-func AppendFile[S ~string | ~[]byte](path string, data S) error {
+func AppendFile[S ~string | ~[]byte](path string, data S) (err error) {
 	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return fmt.Errorf("error opening file %q: \n%w", path, err)
 	}
-	defer f.Close()
+	defer func() {
+		err = errors.Join(err, f.Close())
+	}()
 
 	if _, err := f.Write([]byte(data)); err != nil {
 		return fmt.Errorf("error appending data to file %q: \n%w", path, err)
