@@ -12,11 +12,6 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    # Only run if:
-    # 1. The triggering workflow succeeded
-    # 2. It was run on a tag (refs/tags/…)
-    if: ${{ startsWith(github.ref, 'refs/tags/') && github.event.workflow_run.conclusion == 'success' }}
-
     steps:
       - name: Checkout Git repository
         uses: actions/checkout@v4
