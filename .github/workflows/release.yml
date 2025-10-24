@@ -24,6 +24,10 @@ jobs:
     steps:
       - name: Checkout Git repository
         uses: actions/checkout@v4
+        with:
+          # Needed for tags to exist locally
+          fetch-depth: 0 
+          fetch-tags: true
 
       - name: Capture current date/time
         run: echo "TIME=$(LC_ALL=C TZ=GMT date '+%a, %d %b %Y %T %Z')" >> $GITHUB_ENV
@@ -33,7 +37,8 @@ jobs:
         with:
           generate_attestations: true
           go_version_file: go.mod
-          go_build_options: "-ldflags=\"-s -w \
-            -X 'github.com/Bertie690/gh-pr-list/cli.version=${{ github.action_ref }}' \
-            -X 'github.com/Bertie690/gh-pr-list/cli.commit=${{ github.sha }}' \
+          go_build_options: >
+            "-ldflags=\"-s -w
+            -X 'github.com/Bertie690/gh-pr-list/cli.version=${{ github.action_ref }}'
+            -X 'github.com/Bertie690/gh-pr-list/cli.commit=${{ github.sha }}'
             -X 'github.com/Bertie690/gh-pr-list/cli.buildTime=\"$TIME\"'\""
