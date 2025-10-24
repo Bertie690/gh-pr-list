@@ -19,6 +19,7 @@ import (
 var (
 	version   = "0.0.0-develop"
 	commit    = "local"
+	buildTime = "Eventually"
 )
 
 var rootCmd = &cobra.Command{
@@ -36,7 +37,7 @@ For more information about JQ or Go template formatting, see ` + "`gh help forma
 
 // Execute executes the command.
 func Execute() {
-	rootCmd.Version = versionText(version, commit)
+	rootCmd.Version = versionText(version, commit, buildTime)
 	rootCmd.SetVersionTemplate(`gh-pr-list {{printf "%s\n" .Version}}`)
 	err := rootCmd.Execute()
 	if err != nil {
@@ -45,12 +46,16 @@ func Execute() {
 }
 
 // versionText gets the versioning text from the version, commit and build time.
-func versionText(version, commit string) (result string) {
+func versionText(version, commit, buildTime string) (result string) {
 	if versionWithoutV, _ := strings.CutPrefix(version, "v"); versionWithoutV != "" {
 		result += "\nVersion: " + versionWithoutV
 	}
 	if commit != "" {
-		result += "\nCommit: " + commit
+		// Cap SHA length at 7 characters
+		result += "\nCommit SHA: " + commit[0:max(len(commit), 7)]
+	}
+	if buildTime != "" {
+		result += "\nBuilt at: " + buildTime
 	}
 	result += "\nGOOS: " + runtime.GOOS + "\nGOARCH: " + runtime.GOARCH
 	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Sum != "" {
