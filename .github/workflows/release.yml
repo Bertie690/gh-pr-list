@@ -17,7 +17,7 @@ jobs:
     # Only run if:
     # 1. The triggering workflow succeeded
     # 2. It was run on a tag (refs/tags/…)
-    # if ${{ github.ref_type == 'tag' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success') }}
+    if: ${{ github.ref_type == 'tag' && github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout Git repository
