@@ -38,7 +38,7 @@ jobs:
           draft_release: ${{github.event_name == 'workflow_dispatch'}}
           generate_attestations: true
           go_version_file: go.mod
-          go_build_options: >
-            -ldflags=$"-X \"github.com/Bertie690/gh-pr-list/cli.version=${{ github.ref_name }}\"
-            -X "github.com/Bertie690/gh-pr-list/cli.commit=${{ github.sha }}"
-            -X \"github.com/Bertie690/gh-pr-list/cli.buildTime=$(date --utc '+%a, %d %b %Y %T %Z')\""
+          go_build_options: |
+            -ldflags="-X 'github.com/Bertie690/gh-pr-list/cli.version=${{ env.GH_RELEASE_TAG }}' \
+            -X 'github.com/Bertie690/gh-pr-list/cli.commit=${{ github.sha }}' \
+            -X 'github.com/Bertie690/gh-pr-list/cli.buildTime=$(date --utc '+%a, %d %b %Y %T %Z')'"
