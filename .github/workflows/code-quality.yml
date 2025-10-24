@@ -18,6 +18,7 @@ on:
 
 permissions:
   contents: read
+  actions: write
 
 env:
   go_version: 1.25.1
@@ -100,5 +101,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: echo "All checks passed ✅"
+      - name: Trigger release if pushed to tag
+        if: github.event.push, 'refs/tags' )
+        run: |
+          gh workflow run --ref ${{ github.ref_name }} Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
