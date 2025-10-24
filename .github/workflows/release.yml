@@ -19,10 +19,7 @@ jobs:
     # Only run if:
     # 1. The triggering workflow succeeded
     # 2. It was run on a tag (refs/tags/…)
-    if: > 
-      ${{ startsWith(github.ref, 'refs/tags/') 
-      && (github.event_name == 'workflow_dispatch' 
-        || github.event.workflow_run.conclusion == 'success') }}
+    # if ${{ github.ref_type == 'tag' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success') }}
 
     steps:
       - name: Checkout Git repository
@@ -39,5 +36,5 @@ jobs:
           generate_attestations: true
           go_version_file: go.mod
           go_build_options: >
-            -ldflags="-X 'github.com/Bertie690/gh-pr-list/cli.version=${{ github.ref }}'
+            -ldflags="-X 'github.com/Bertie690/gh-pr-list/cli.version=${{ github.ref_name }}'
             -X 'github.com/Bertie690/gh-pr-list/cli.commit=${{ github.sha }}'"
