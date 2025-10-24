@@ -51,7 +51,8 @@ func versionText(version, commit, buildTime string) (result string) {
 		result += "\nVersion: " + versionWithoutV
 	}
 	if commit != "" {
-		result += "\nCommit: " + commit
+		// Cap SHA length at 7 characters
+		result += "\nCommit SHA: " + commit[0:max(len(commit), 7)]
 	}
 	if buildTime != "" {
 		result += "\nBuilt at: " + buildTime
