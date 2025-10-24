@@ -5,6 +5,8 @@ on:
   workflow_run:
     workflows: ["Code Quality"]
     types: completed
+  # For testing only
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -19,7 +21,7 @@ jobs:
     # 2. It was run on a tag (refs/tags/…)
     if: >
       ${{ github.event.workflow_run.conclusion == 'success' &&
-          startsWith(github.event.workflow_run.head_branch, 'refs/tags/') }}
+          startsWith(github.ref, 'refs/tags/') }}
 
     steps:
       - name: Checkout Git repository
@@ -29,25 +31,14 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Capture current date/time
-        run: |
-          {
-            echo 'TIME<<EOF'
-            LC_ALL=C TZ=GMT date '+%a, %d %b %Y %T %Z'
-            echo EOF
-          } >> "$GITHUB_ENV"
-
-      - name: Test stored timestamp works
-        run: >
-          echo "Deploying at $TIME"
-
       - name: Create GitHub CLI extension
         uses: cli/gh-extension-precompile@v2
         with:
+          draft_release: ${{github.event_name == 'workflow_dispatch'}}
           generate_attestations: true
           go_version_file: go.mod
           go_build_options: >
             -ldflags="
-            -X 'github.com/Bertie690/gh-pr-list/cli.version=${{ github.action_ref }}'
+            -X 'github.com/Bertie690/gh-pr-list/cli.version=${{ github.ref_name }}'
             -X 'github.com/Bertie690/gh-pr-list/cli.commit=${{ github.sha }}'
-            -X 'github.com/Bertie690/gh-pr-list/cli.buildTime=$TIME'"
+            -X 'github.com/Bertie690/gh-pr-list/cli.buildTime=TZ=GMT $(date '+%a, %d %b %Y %T %Z')'"
