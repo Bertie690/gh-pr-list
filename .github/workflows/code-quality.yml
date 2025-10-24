@@ -4,11 +4,12 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     branches:
-      - "main"
+      - "main"    
   push:
     branches:
       - "main"
-      - "v*"
+    tags:
+      -"v*"
   merge_group:
     types: [checks_requested]
 
