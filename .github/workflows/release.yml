@@ -36,3 +36,5 @@ jobs:
           # go_build_options: >
           #   -ldflags="-X 'github.com/Bertie690/gh-pr-list/cli.version=${{ github.ref_name }}'
           #   -X 'github.com/Bertie690/gh-pr-list/cli.commit=${{ github.sha }}'"
+          #   -X 'github.com/Bertie690/gh-pr-list/cli.buildTime=$(date --utc '+%a, %d %b %Y %T %Z')'"
+
