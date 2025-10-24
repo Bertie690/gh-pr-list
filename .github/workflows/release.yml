@@ -2,9 +2,7 @@
 # Triggered whenever code-quality.yml succeeds on a push to a tag branch.
 name: release
 on:
-  workflow_run:
-    workflows: ["Code Quality"]
-    types: completed
+  workflow_dispatch:
 
 permissions:
   contents: write
