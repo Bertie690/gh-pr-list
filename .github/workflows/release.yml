@@ -30,7 +30,7 @@ jobs:
           # Needed for tags to exist locally
           fetch-depth: 0
           fetch-tags: true
-
+          
       - name: Create GitHub CLI extension
         uses: cli/gh-extension-precompile@v2
         with:
@@ -41,4 +41,4 @@ jobs:
             -ldflags="
             -X 'github.com/Bertie690/gh-pr-list/cli.version=${{ github.ref_name }}'
             -X 'github.com/Bertie690/gh-pr-list/cli.commit=${{ github.sha }}'
-            -X 'github.com/Bertie690/gh-pr-list/cli.buildTime=TZ=GMT $(date '+%a, %d %b %Y %T %Z')'"
+            -X 'github.com/Bertie690/gh-pr-list/cli.buildTime=$(date --utc '+%a, %d %b %Y %T %Z')'"
