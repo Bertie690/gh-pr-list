@@ -29,11 +29,35 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
+      - name: Determine Release Tag
+        id: determine_release_tag
+        run: |
+          if [[ "$GITHUB_REF" = refs/tags/* ]]; then
+              tag="${GITHUB_REF#refs/tags/}"
+          else
+              tag="$(git describe --tags --abbrev=0)"
+          fi
+          
+          # Make release tag if manually testing release process
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+              if [[ "$tag" =~ (.*)-rc([0-9]+) ]]; then
+                  # bump -rc suffix
+                  tag="${BASH_REMATCH[1]}-rc$((BASH_REMATCH[2] + 1))"; # 1.0.3-rc2, etc"
+              elif [[ "$tag" =~ (.*)\.([0-9]+) ]]; then
+                  # bump version and add -rc1
+                  tag="${BASH_REMATCH[1]}.$((BASH_REMATCH[2] + 1))-rc1";
+              fi
+          fi
+  
+          echo "TAG=$tag" >> "$GITHUB_OUTPUT"
+        shell: bash
+
       - name: Create GitHub CLI extension
         uses: cli/gh-extension-precompile@v2
         with:
           generate_attestations: true
           go_version_file: go.mod
+          release-tag: ${{ steps.determine_release_tag.outputs.TAG }}
           # TODO: Enable once https://github.com/cli/gh-extension-precompile releases a new version with proper argument quoting
           # go_build_options: >
           #  -ldflags="-X 'github.com/Bertie690/gh-pr-list/cli.version=${{ github.ref_name }}'
