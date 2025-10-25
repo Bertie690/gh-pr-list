@@ -2,7 +2,9 @@
 # Triggered whenever code-quality.yml succeeds on a push to a tag branch.
 name: Release
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - v*
 
 permissions:
   contents: write
@@ -10,7 +12,12 @@ permissions:
   attestations: write
 
 jobs:
+  code-quality:
+    name: Verify Code Quality
+    uses: ./.github/workflows/code-quality.yml
+
   release:
+    needs: code-quality
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Git repository
@@ -29,4 +36,3 @@ jobs:
             -ldflags="-X 'github.com/Bertie690/gh-pr-list/cli.version=${{ github.ref_name }}'
             -X 'github.com/Bertie690/gh-pr-list/cli.commit=${{ github.sha }}'"
             -X 'github.com/Bertie690/gh-pr-list/cli.buildTime=$(date --utc '+%a, %d %b %Y %T %Z')'"
-
