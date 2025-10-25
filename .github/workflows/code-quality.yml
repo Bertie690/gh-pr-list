@@ -4,21 +4,19 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     branches:
-      - "main"    
+      - "main"
   push:
     branches:
       - "main"
-    tags:
-      -"v*"
   merge_group:
     types: [checks_requested]
 
   # allow manually triggering on branches
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
-  actions: write
 
 env:
   go_version: 1.25.1
@@ -101,10 +99,4 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Trigger release if pushed to tag
-        if: (github.event_name == 'push' || github.event_name == 'pull_request') && startsWith(github.ref_name, 'refs/tags')
-        run: |
-          gh workflow run --ref ${{ github.ref_name }} Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+      - run: echo "All good!"
