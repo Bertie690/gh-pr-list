@@ -13,10 +13,10 @@ import (
 
 func Test_applyTemplate(t *testing.T) {
 	tests := []struct {
-		name    string
-		json    string
-		tmpl    string
-		want    string
+		name string
+		json string
+		tmpl string
+		want string
 	}{
 		{
 			name: "1 PR URL/Title",
