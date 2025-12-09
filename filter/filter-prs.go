@@ -7,14 +7,26 @@ package filter
 
 import (
 	"bytes"
+	"errors"
 
-	"github.com/cli/go-gh/v2/pkg/jq"
+	"github.com/cli/go-gh/v2"
 )
 
-func filterJSON(json *bytes.Buffer, query string) (*bytes.Buffer, error) {
-	var b bytes.Buffer
-	if err := jq.EvaluateFormatted(json, &b, query, "\t", false); err != nil {
-		return nil, err
+// filterPRs accesses the `gh` API to return a filtered list of pull requests.
+func filterPRs(query string, args []string) (*bytes.Buffer, error) {
+	// get the args
+	execArgs := []string{
+		"pr",
+		"list",
+		"--json=" + validArgs,
 	}
-	return &b, nil
+	if query != "" {
+		execArgs = append(execArgs, "--jq="+query)
+	}
+
+	stdout, stderr, err := gh.Exec(append(execArgs, args...)...)
+	if err != nil {
+		return nil, errors.New(stderr.String())
+	}
+	return &stdout, nil
 }
