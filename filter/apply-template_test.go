@@ -17,7 +17,6 @@ func Test_applyTemplate(t *testing.T) {
 		json    string
 		tmpl    string
 		want    string
-		wantErr bool
 	}{
 		{
 			name: "1 PR URL/Title",
@@ -39,13 +38,8 @@ func Test_applyTemplate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			b := bytes.NewBufferString(tt.json)
 			got, gotErr := applyTemplate(b, tt.tmpl)
-			if (gotErr != nil) != tt.wantErr {
-				if tt.wantErr {
-					t.Error("applyTemplate() succeeded unexpectedly")
-				} else {
-					t.Errorf("applyTemplate() failed: %v", gotErr)
-				}
-				return
+			if gotErr != nil {
+				t.Fatalf("applyTemplate() failed: %v", gotErr)
 			}
 
 			got = strings.TrimSpace(got)

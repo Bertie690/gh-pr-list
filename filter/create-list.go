@@ -6,16 +6,17 @@
 package filter
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"slices"
 	"strings"
-
-	"github.com/cli/go-gh/v2"
 )
 
 func CreateList(query, template string, args []string) (err error) {
+	if err := validateExtraArgs(args); err != nil {
+		return err
+	}
+
 	json, err := filterPRs(query, args)
 	if err != nil {
 		return err
@@ -27,28 +28,6 @@ func CreateList(query, template string, args []string) (err error) {
 	}
 	fmt.Println(output)
 	return nil
-}
-
-func filterPRs(query string, args []string) (*bytes.Buffer, error) {
-	if err := validateExtraArgs(args); err != nil {
-		return nil, err
-	}
-
-	// get the args
-	execArgs := []string{
-		"pr",
-		"list",
-		"--json=" + strings.Join(validArgs, ","),
-	}
-	if query != "" {
-		execArgs = append(execArgs, "--jq="+query)
-	}
-
-	stdout, stderr, err := gh.Exec(append(execArgs, args...)...)
-	if err != nil {
-		return nil, errors.New(stderr.String())
-	}
-	return formatJSON(&stdout)
 }
 
 // validateExtraArgs performs extra validation to ensure that any extra CLI args are valid.
