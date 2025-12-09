@@ -8,12 +8,13 @@ package filter
 import (
 	"bytes"
 
-	"github.com/cli/go-gh/v2/pkg/jq"
+	"github.com/cli/go-gh/v2/pkg/jsonpretty"
 )
 
-func filterJSON(json *bytes.Buffer, query string) (*bytes.Buffer, error) {
+func formatJSON(json *bytes.Buffer) (*bytes.Buffer, error) {
 	var b bytes.Buffer
-	if err := jq.EvaluateFormatted(json, &b, query, "\t", false); err != nil {
+
+	if err := jsonpretty.Format(&b, json, "\t", false); err != nil {
 		return nil, err
 	}
 	return &b, nil
