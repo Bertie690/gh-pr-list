@@ -12,7 +12,7 @@ SPDX-License-Identifier: CC-BY-NC-SA-4.0
 
 ### Installing Mage
 
-Next, you'll also probably  to install [Mage](https://github.com/magefile/mage), a make/rake-like build tool & command executer written in Go.
+Next, you'll also probably want to install [Mage](https://github.com/magefile/mage), a make/rake-like build tool & command executer written in Go.
 Run the following command in your terminal of choice:
 
 ```bash
