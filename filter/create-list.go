@@ -56,7 +56,7 @@ func validateExtraArgs(args []string) error {
 	if slices.ContainsFunc(args, func(s string) bool {
 		return strings.Contains(s, "--json")
 	}) {
-		return errors.New("cannot pass --json flag; all fields are enabled by default")
+		return errors.New("cannot pass '--json' flag; required fields are inferred from filter/template")
 	}
 
 	return nil
