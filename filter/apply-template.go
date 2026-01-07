@@ -22,7 +22,7 @@ func applyTemplate(queried *bytes.Buffer, tmpl string) (output string, err error
 	if !strings.HasSuffix(tmpl, "{{tablerender}}") {
 		tmpl += "{{tablerender}}"
 	}
-	tm := template.New(&out, getLineMax(term.FromEnv().IsTerminalOutput()), term.FromEnv().IsTrueColorSupported()).Funcs(getTemplateFuncs())
+	tm := template.New(&out, getLineMax(), term.FromEnv().IsTrueColorSupported()).Funcs(getTemplateFuncs())
 	if err = tm.Parse(tmpl); err != nil {
 		return output, err
 	}
@@ -32,10 +32,15 @@ func applyTemplate(queried *bytes.Buffer, tmpl string) (output string, err error
 	return out.String(), nil
 }
 
-func getLineMax(isTerm bool) int {
-	// TODO: Make this configurable
-	if isTerm {
+// TODO: Make this configurable
+func getLineMax() int {
+	env := term.FromEnv()
+	if !env.IsTerminalOutput() {
+		return 99_999
+	}
+	width, _, err := env.Size()
+	if err != nil || width < 0 {
 		return 120
 	}
-	return 99999
+	return width
 }

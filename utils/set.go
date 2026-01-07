@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2026 Matthew Taylor <taylormw163@gmail.com>
+// SPDX-FileContributor: Matthew Taylor (Bertie690)
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package utils
 
 // A Set is a basic implementation of a key-only hashmap.

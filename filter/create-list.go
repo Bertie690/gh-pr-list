@@ -19,10 +19,10 @@ func CreateList(query, template string, args []string) (err error) {
 		return err
 	}
 
-	fields := getRequiredFields(query, template);
+	fields := getRequiredFields(query, template)
 	if fields == "" {
 		// Edge case if query and template are both empty
-		cmd, err := runCmd("pr", "list");
+		cmd, err := runCmd("pr", "list")
 		if err != nil {
 			return err
 		}

@@ -13,7 +13,7 @@ import (
 )
 
 // All valid arguments that can be obtained from JSON.
-var validArgs = utils.NewSet([]string{
+var validArgs = utils.NewSet(
 	"additions",
 	"assignees",
 	"author",
@@ -58,7 +58,7 @@ var validArgs = utils.NewSet([]string{
 	"title",
 	"updatedAt",
 	"url",
-}...)
+)
 
 // Regex to extract field names from dot notation property access.
 var fieldsRe = regexp.MustCompile(`\.(\w+)`)
