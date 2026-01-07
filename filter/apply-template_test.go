@@ -21,16 +21,31 @@ func Test_applyTemplate(t *testing.T) {
 		{
 			name: "1 PR URL/Title",
 			json: `[
-  {
+	{
 		"title": "Nice PR",
 		"number": 12345,
-    "mergeable": "CONFLICTING",
-    "isDraft": false,
-    "state": "OPEN",
+		"mergeable": "CONFLICTING",
+		"isDraft": false,
+		"state": "OPEN",
 		"url": "https://www.youtube.com/watch?v=XfELJU1mRMg"
-  }
+	}
 ]`,
 			tmpl: `{{range .}}{{tablerow .title (printf "#%v" .number) .url}}{{end}}{{tablerender}}`,
+			want: `Nice PR  #12345  https://www.youtube.com/watch?v=XfELJU1mRMg`,
+		},
+		{
+			name: "No tablerender",
+			json: `[
+	{
+		"title": "Nice PR",
+		"number": 12345,
+		"mergeable": "CONFLICTING",
+		"isDraft": false,
+		"state": "OPEN",
+		"url": "https://www.youtube.com/watch?v=XfELJU1mRMg"
+	}
+]`,
+			tmpl: `{{range .}}{{tablerow .title (printf "#%v" .number) .url}}{{end}}`,
 			want: `Nice PR  #12345  https://www.youtube.com/watch?v=XfELJU1mRMg`,
 		},
 	}
