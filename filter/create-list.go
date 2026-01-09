@@ -12,12 +12,33 @@ import (
 	"strings"
 )
 
+// CreateList creates and outputs a list of PRs based on the provided query, template, and extra CLI args.
+// It returns any error produced.
 func CreateList(query, template string, args []string) (err error) {
-	if err := validateExtraArgs(args); err != nil {
+	if err = validateExtraArgs(args); err != nil {
 		return err
 	}
 
-	json, err := filterPRs(query, args)
+	fields := getRequiredFields(query, template)
+	if fields == "" {
+		// Edge case if query and template are both empty
+		cmd, err := runCmd("pr", "list")
+		if err != nil {
+			return err
+		}
+		fmt.Println(cmd.String())
+		return nil
+	}
+
+	execArgs := []string{
+		"pr",
+		"list",
+		"--json=" + fields,
+	}
+	if query != "" {
+		execArgs = append(execArgs, "--jq="+query)
+	}
+	json, err := runCmd(append(execArgs, args...)...)
 	if err != nil {
 		return err
 	}
@@ -35,7 +56,7 @@ func validateExtraArgs(args []string) error {
 	if slices.ContainsFunc(args, func(s string) bool {
 		return strings.Contains(s, "--json")
 	}) {
-		return errors.New("cannot pass --json flag; all fields are enabled by default")
+		return errors.New("cannot pass '--json' flag; required fields are inferred from filter/template")
 	}
 
 	return nil
