@@ -11,6 +11,7 @@ import (
 	"github.com/Bertie690/gh-pr-list/utils"
 )
 
+// getTemplateFuncs returns a map of additional template functions used in PR listing templates.
 func getTemplateFuncs() map[string]any {
 	return map[string]any{
 		// reverse argument order so hex comes first (for consistency with `autocolor` template func)

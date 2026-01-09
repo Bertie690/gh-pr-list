@@ -42,6 +42,12 @@ func Test_getRequiredFields(t *testing.T) {
 			template: `{{range .}}{{tablerow (printf "[%s](<%s>)" .title .url)}}{{end}}`,
 			want:     "state,mergeable,isDraft,statusCheckRollup,title,url",
 		},
+		{
+			name:     "uses colorstate",
+			query:    `map(select(.state == "OPEN"))`,
+			template: `{{range .}}{{tablerow ((autocolor (colorstate .) (printf "#%v" .number)) | hyperlink .url) ((timeago .updatedAt) | autocolor "blue")}}{{end}}`,
+			want:     "state,number,url,updatedAt,isDraft",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

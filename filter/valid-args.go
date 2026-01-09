@@ -68,31 +68,41 @@ func getRequiredFields(query, template string) string {
 	var b strings.Builder
 	seen := utils.NewSet[string]()
 
-	// NB: We can use the same regex since both JQ and GO templates use dot notation to access fields
-	queryMatch := fieldsRe.FindAllStringSubmatch(query, -1)
-	templateMatch := fieldsRe.FindAllStringSubmatch(template, -1)
+	addField := func(field string) {
+		if !seen.Contains(field) {
+			b.WriteString(field)
+			b.WriteString(",")
+			seen.Add(field)
+		}
+	}
 
-	checkMatches(queryMatch, seen, &b)
-	checkMatches(templateMatch, seen, &b)
+	// checkMatches adds valid fields from matches to the builder if they haven't been seen before.
+	checkMatches := func(matches [][]string) {
+		for _, match := range matches {
+			if len(match) < 2 {
+				continue
+			}
+			field := match[1]
+			if !validArgs.Contains(field) {
+				continue
+			}
+			addField(field)
+		}
+	}
+
+	// NB: We can use the same regex since both JQ and GO templates use dot notation to access fields
+	checkMatches(fieldsRe.FindAllStringSubmatch(query, -1))
+	checkMatches(fieldsRe.FindAllStringSubmatch(template, -1))
+
+	// add special fields for colorstate custom function (uses state and isDraft)
+	if strings.Contains(template, "colorstate") {
+		addField("state")
+		addField("isDraft")
+	}
 
 	result := b.String()
 	if len(result) > 0 {
 		return result[:len(result)-1] // Remove trailing comma
 	}
 	return ""
-}
-
-// checkMatches adds valid fields from matches to the builder if they haven't been seen before.
-func checkMatches(matches [][]string, seen utils.Set[string], b *strings.Builder) {
-	for _, match := range matches {
-		if len(match) < 2 {
-			continue
-		}
-		field := match[1]
-		if validArgs.Contains(field) && !seen.Contains(field) {
-			b.WriteString(field)
-			b.WriteString(",")
-			seen.Add(field)
-		}
-	}
 }
